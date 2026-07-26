@@ -129,10 +129,6 @@ table.reach td.region { color: var(--text-muted); font-size: 0.66rem; }
 table.reach tr:hover td { background: rgba(255,255,255,0.02); }
 .hidden { display: none !important; }
 
-/* ---- footer ------------------------------------------------------------ */
-.foot { text-align: center; color: var(--text-muted); font-family: var(--mono); font-size: 0.68rem;
-  padding: 8px 24px 48px; }
-.foot a { color: var(--accent); text-decoration: none; }
 .note { color: var(--text-muted); font-family: var(--mono); font-size: 0.66rem; line-height: 1.5; margin-top: 10px; }
 
 /* ---- responsive -------------------------------------------------------- */
