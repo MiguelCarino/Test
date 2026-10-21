@@ -13,7 +13,11 @@
   <meta property="og:title" content="Carino Test">
   <meta property="og:description" content="Carino Test — a complete in-browser network and system diagnostics suite: WAN/LAN, NAT and WebRTC topology, DNS-over-HTTPS, latency, speed, and a live reachability sweep of the top 50 websites in the world.">
   <meta property="og:url" content="https://test.carino.systems/">
-  <meta property="og:image" content="https://test.carino.systems/logo.webp">
+  <meta property="og:image" content="https://test.carino.systems/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Carino Test">
+  <meta name="twitter:card" content="summary_large_image">
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Carino Test", "url": "https://test.carino.systems/", "description": "Carino Test — a complete in-browser network and system diagnostics suite: WAN/LAN, NAT and WebRTC topology, DNS-over-HTTPS, latency, speed, and a live reachability sweep of the top 50 websites in the world.", "operatingSystem": "Any (runs in a web browser)", "isAccessibleForFree": true, "author": {"@type": "Person", "name": "Miguel Cariño", "url": "https://carino.systems/"}}</script>
   <!-- /carino:head -->
   <link rel="stylesheet" href="fonts/carino-fonts.css" />
@@ -102,7 +106,7 @@
       </div>
       <div class="reach-toolbar">
         <input type="search" id="reachSearch" placeholder="filter by name, host or region…" autocomplete="off" />
-        <select id="reachRegionFilter"><option value="">all regions</option></select>
+        <select id="reachRegionFilter" aria-label="Filter by region"><option value="">all regions</option></select>
       </div>
       <div class="table-scroll">
         <table class="reach" id="reachTable">

@@ -2,6 +2,8 @@
 
 A complete in-browser **network & system diagnostics** suite → **[test.carino.systems](https://test.carino.systems)**
 
+![Carino Test](screenshot.webp)
+
 Everything runs client-side. Nothing is uploaded; every probe fires from your own
 browser and the results never leave the page (except the exports you download).
 
@@ -51,6 +53,8 @@ No build step — vanilla ES modules loaded straight from `assets/js/`:
 | `reach.js` | the top-50 sweep + table |
 | `export.js` | PNG / JSON export |
 | `app.js` | orchestration + progress |
+
+**Related tools:** [Ping](https://ping.carino.systems/) · [Topo](https://topo.carino.systems/) · [Hardware](https://hardware.carino.systems/)
 
 ## License
 
