@@ -1,7 +1,17 @@
 // Carino Test — shared report state. Every module writes its results here so the
 // PNG/JSON export can serialize one coherent snapshot without scraping the DOM.
 
+// Where the numbers come from, carried in every export.
+export const SOURCES = [
+  'this browser',
+  'ipify.org, ipapi.co (public address, ISP)',
+  'Cloudflare and Google (DNS-over-HTTPS, STUN)',
+  'raw.githubusercontent.com (speed test, up to 25 MB)',
+  'the top 50 sites (HTTPS reachability)',
+];
+
 export const report = {
+  sources: SOURCES,
   startedAt: null,        // ISO string, set when a full run begins
   finishedAt: null,
   connection: {},         // { wan4, wan6, isp, asn, geo, lan, nat, ifaces, rtcPublic, leak }

@@ -2,7 +2,18 @@
 // APIs (no network), so failures are cheap: any probe that throws or is missing
 // degrades to 'masked' / 'N/A' / '—' rather than blowing up the run.
 
-import { setText } from './util.js';
+import { setText, setKey } from './util.js';
+
+// The few values that are words rather than readings are translated; the
+// report keeps them in English.
+const WORDS = new Set(['masked', 'N/A', 'Unknown', 'unknown']);
+function show(id, v) {
+  let m;
+  if (WORDS.has(v)) setKey(id, v);
+  else if ((m = /^(\d+) threads$/.exec(v))) setKey(id, '{n} threads', { n: m[1] });
+  else if ((m = /^(\d+%) \((charging|on battery)\)$/.exec(v))) setKey(id, '{p} (' + m[2] + ')', { p: m[1] });
+  else setText(id, v);
+}
 import { report } from './state.js';
 
 // ---- OS from the UA string ------------------------------------------------
@@ -142,23 +153,23 @@ export async function detectSystem() {
 
   // Cheap synchronous fields first so the panel fills in immediately.
   const os = detectOS(ua);
-  setText('sysOS', os);
+  show('sysOS', os);
 
   const cpu = navigator.hardwareConcurrency ? navigator.hardwareConcurrency + ' threads' : 'masked';
-  setText('sysCpu', cpu);
+  show('sysCpu', cpu);
 
   const ram = navigator.deviceMemory ? '~' + navigator.deviceMemory + ' GB' : 'masked';
-  setText('sysRam', ram);
+  show('sysRam', ram);
 
   const gpu = detectGPU();
-  setText('sysGpu', gpu);
+  show('sysGpu', gpu);
 
   let screenStr = '—';
   try {
     const dpr = window.devicePixelRatio || 1;
     screenStr = (screen.width || '?') + ' x ' + (screen.height || '?') + ' @' + dpr + 'x';
   } catch { /* screen unavailable */ }
-  setText('sysScreen', screenStr);
+  show('sysScreen', screenStr);
 
   let lang = 'masked';
   try {
@@ -166,11 +177,11 @@ export async function detectSystem() {
     const n = (navigator.languages && navigator.languages.length) || 0;
     if (n > 1) lang += ' (+' + (n - 1) + ')';
   } catch { /* ignore */ }
-  setText('sysLang', lang);
+  show('sysLang', lang);
 
   let tz = 'masked';
   try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'masked'; } catch { /* ignore */ }
-  setText('sysTz', tz);
+  show('sysTz', tz);
 
   // Async fields — resolve in parallel, tolerate individual failures.
   const [browser, arch, battery] = await Promise.all([
@@ -179,9 +190,9 @@ export async function detectSystem() {
     detectBattery().catch(() => 'N/A'),
   ]);
 
-  setText('sysBrowser', browser);
-  setText('sysArch', arch);
-  setText('sysBattery', battery);
+  show('sysBrowser', browser);
+  show('sysArch', arch);
+  show('sysBattery', battery);
 
   report.system = { os, browser, arch, cpu, ram, gpu, screen: screenStr, battery, lang, tz, ua };
   return report.system;

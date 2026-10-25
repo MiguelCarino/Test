@@ -3,7 +3,7 @@
 // checks whether the two resolvers agree, which surfaces DNS tampering,
 // split-horizon answers, or CDN geo-steering differences.
 
-import { $, el, resolveDoH } from './util.js';
+import { $, el, resolveDoH, setKey } from './util.js';
 import { report } from './state.js';
 
 const SAMPLE = [
@@ -48,13 +48,15 @@ export async function runDNS() {
       tr.appendChild(el('td', null, res.v6.ip || '—'));
       // Highlight disagreement; '✓' and matches stay neutral.
       const bad = res.match === '⚠ differ' || res.match === 'partial';
-      tr.appendChild(el('td', bad ? 'bad' : null, res.match));
+      const matchTd = el('td', bad ? 'bad' : null, res.match);
+      if (bad) setKey(matchTd, res.match);
+      tr.appendChild(matchTd);
       tbody.appendChild(tr);
     }
   });
 
   const sum = $('dnsSummary');
-  if (sum) sum.textContent = `${resolved}/${SAMPLE.length} resolved · ${mismatch} mismatch`;
+  if (sum) setKey(sum, '{n}/{m} resolved · {x} mismatch', { n: resolved, m: SAMPLE.length, x: mismatch });
 
   report.dns = {
     rows: results.map((r) => ({ host: r.host, cf: r.cf, gg: r.gg, v6: r.v6, match: r.match })),

@@ -33,10 +33,10 @@ const val = (v) => (v == null || v === '' ? '—' : String(v));
 const num = (v) => (typeof v === 'number' && isFinite(v) ? v : null);
 const fmtMs = (v) => { const n = num(v); return n == null ? '—' : Math.round(n) + ' ms'; };
 
-// Reachability dot color: gold = up & responsive, white = up but slow, grey = down.
+// Reachability dot color: green = up & responsive, white = up but slow, grey = down.
 function dotColor(ok, ms) {
   if (!ok) return '#666666';
-  return num(ms) != null && ms > 600 ? '#ffffff' : '#eab308';
+  return num(ms) != null && ms > 600 ? '#ffffff' : '#22c55e';
 }
 
 export function exportPNG() {
@@ -129,11 +129,11 @@ export function exportPNG() {
       ctx.font = "900 18px 'Red Hat Display', system-ui, sans-serif";
       ctx.textAlign = 'left';
       ctx.fillText('CARINO TEST — DIAGNOSTICS', pad, y + 20);
-      // ISO timestamp, grey mono, right-aligned.
+      // When the run finished (not when it was exported), grey mono, right-aligned.
       ctx.fillStyle = GREY;
       ctx.font = '10px ui-monospace, SFMono-Regular, Menlo, monospace';
       ctx.textAlign = 'right';
-      ctx.fillText(new Date().toISOString(), W - pad, y + 18);
+      ctx.fillText(report.finishedAt || report.startedAt || new Date().toISOString(), W - pad, y + 18);
       ctx.textAlign = 'left';
     } else if (r.type === 'header') {
       ctx.fillStyle = GREY;
@@ -180,11 +180,11 @@ export function exportPNG() {
     y += r.h;
   }
 
-  // Footer — carino.systems, gold, centered.
+  // Footer — the site and the source, gold, centered.
   ctx.fillStyle = GOLD;
   ctx.font = '11px ui-monospace, SFMono-Regular, Menlo, monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('carino.systems', W / 2, H - 18);
+  ctx.fillText('test.carino.systems · measured by this browser', W / 2, H - 18);
   ctx.textAlign = 'left';
 
   // toBlob is async; download once the raster is ready.

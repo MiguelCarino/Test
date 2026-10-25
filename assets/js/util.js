@@ -1,20 +1,39 @@
 // Carino Test — shared utilities used by every diagnostics module.
 // Vanilla ES module, no build step. Browser-only APIs.
 
-export const SLOW_MS = 600;   // above this a reachable target is "slow" (white dot) instead of responsive (gold)
+export const SLOW_MS = 600;   // above this a reachable target is "slow" (white dot) instead of responsive (green)
 
 // ---- DOM helpers ---------------------------------------------------------
 export const $ = (id) => document.getElementById(id);
 
 export function setText(id, text) {
   const e = $(id);
-  if (e) e.textContent = text == null ? '' : String(text);
+  if (!e) return;
+  delete e.dataset.tkey;
+  e.textContent = text == null ? '' : String(text);
 }
 
-// Status dot: cls in success | slow | fail | unknown | scanning.
+// ---- i18n ------------------------------------------------------------------
+// window.t is i18n.js's lookup; the English text is the key. setKey writes a
+// translated string and leaves its key (and any {placeholders}) on the element,
+// so i18n.js can repaint it when the language changes mid-page.
+export const t = (k) => (window.t ? window.t(k) : k);
+export function fill(s, vars) {
+  return vars ? s.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m)) : s;
+}
+export function setKey(target, key, vars) {
+  const e = typeof target === 'string' ? $(target) : target;
+  if (!e) return;
+  e.dataset.tkey = key;
+  if (vars) e.dataset.tvars = JSON.stringify(vars); else delete e.dataset.tvars;
+  e.textContent = fill(t(key), vars);
+}
+
+// Status dot: cls in success | slow | fail | unknown | scanning. (.sdot, not
+// .dot: carino-ui.css owns .dot.)
 export function setDot(id, cls) {
   const e = $(id);
-  if (e) e.className = 'dot ' + cls;
+  if (e) e.className = 'sdot ' + cls;
 }
 
 // Map a measured latency (ms) or a failure to a dot class.

@@ -3,7 +3,7 @@
 // Vanilla ES module, browser-only. Every network call is timed and guarded so
 // a failure degrades to a grey/red dot, never an unhandled rejection.
 
-import { setText, setDot, fetchJSON, tryAll, isFirefox } from './util.js';
+import { setText, setKey, t, setDot, fetchJSON, tryAll, isFirefox } from './util.js';
 import { report } from './state.js';
 
 // ---- WebRTC / NAT probe (reference logic) --------------------------------
@@ -68,7 +68,7 @@ export async function runConnection() {
     c.wan4 = ip;
     setText('wan4', ip); setDot('dot-wan4', 'success');
   } catch (e) {
-    setText('wan4', 'Unavailable'); setDot('dot-wan4', 'fail');
+    setKey('wan4', 'Unavailable'); setDot('dot-wan4', 'fail');
   }
 
   // 3. WAN IPv6 — often absent. Firefox blocks the IPv6-only ipify hosts, so a
@@ -81,7 +81,7 @@ export async function runConnection() {
     c.wan6 = ip6;
     setText('wan6', ip6); setDot('dot-wan6', 'success');
   } catch (e) {
-    setText('wan6', isFirefox() ? 'Blocked by browser' : 'Not detected'); setDot('dot-wan6', 'unknown');
+    setKey('wan6', isFirefox() ? 'Blocked by browser' : 'Not detected'); setDot('dot-wan6', 'unknown');
   }
 
   // 4. ISP / ASN / Geo from a single ipapi lookup. All optional → 'Unavailable'.
@@ -93,7 +93,7 @@ export async function runConnection() {
     c.isp = isp; c.asn = asn; c.geo = geo;
     setText('isp', isp); setText('asn', asn); setText('geo', geo);
   } catch (e) {
-    setText('isp', 'Unavailable'); setText('asn', '—'); setText('geo', 'Unavailable');
+    setKey('isp', 'Unavailable'); setText('asn', '—'); setKey('geo', 'Unavailable');
   }
 
   // 5. WebRTC probe → LAN address, NAT type, interface count, leak check.
@@ -107,17 +107,17 @@ export async function runConnection() {
     setText('lanip', lan); setDot('dot-lan', 'success');
   } else {
     c.lan = null;
-    setText('lanip', 'mDNS masked'); setDot('dot-lan', 'unknown');
+    setKey('lanip', 'mDNS masked'); setDot('dot-lan', 'unknown');
   }
 
   // NAT classification.
   const nat = classifyNAT(r);
   c.nat = nat.txt;
-  setText('natType', nat.txt); setDot('dot-nat', nat.ok ? 'success' : 'unknown');
+  setKey('natType', nat.txt); setDot('dot-nat', nat.ok ? 'success' : 'unknown');
 
   // Interfaces: host + mDNS candidate count is a proxy for active NICs/VPNs.
   c.ifaces = r.ifaces;
-  setText('ifaces', r.ifaces + ' iface(s)'); setDot('dot-ifaces', r.ifaces >= 1 ? 'success' : 'unknown');
+  setKey('ifaces', '{n} iface(s)', { n: r.ifaces }); setDot('dot-ifaces', r.ifaces >= 1 ? 'success' : 'unknown');
 
   // Leak check: the WebRTC-reported public IP should equal the WAN IPv4 we
   // fetched over HTTPS. A mismatch means a VPN/proxy split-tunnel or a WebRTC
@@ -126,22 +126,22 @@ export async function runConnection() {
   c.rtcPublic = rtc;
   if (!rtc) {
     c.leak = 'hidden';
-    setText('rtcLeak', 'hidden'); setDot('dot-leak', 'unknown');
+    setKey('rtcLeak', 'hidden'); setDot('dot-leak', 'unknown');
   } else if (!c.wan4) {
     // We have a WebRTC public IP but no WAN baseline to compare it against
     // (the HTTPS IP APIs all failed) — can't call it a leak, so treat as hidden.
     c.leak = 'hidden';
-    setText('rtcLeak', 'no WAN baseline'); setDot('dot-leak', 'unknown');
+    setKey('rtcLeak', 'no WAN baseline'); setDot('dot-leak', 'unknown');
   } else if (rtc === c.wan4) {
     c.leak = 'matches WAN';
-    setText('rtcLeak', 'matches WAN'); setDot('dot-leak', 'success');
+    setKey('rtcLeak', 'matches WAN'); setDot('dot-leak', 'success');
   } else {
     c.leak = 'leak';
-    setText('rtcLeak', 'LEAK ⚠ ' + rtc); setDot('dot-leak', 'fail');
+    setKey('rtcLeak', 'LEAK ⚠ {ip}', { ip: rtc }); setDot('dot-leak', 'fail');
   }
 
   // 6. One-line roll-up under the panel.
-  setText('connExtra', 'NAT: ' + nat.txt + ' · ' + r.ifaces + ' iface' + (r.ifaces === 1 ? '' : 's'));
+  setKey('connExtra', 'NAT: {nat} · {n} iface(s)', { nat: t(nat.txt), n: r.ifaces });
 
   return c;
 }

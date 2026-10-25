@@ -4,7 +4,7 @@
 // down from the West — that spread is the diagnostic signal.
 import {
   $, setText, el, dotForLatency, fmtMs, median, minOf, maxOf,
-  probeHTTPS, resolveDoH, SLOW_MS,
+  probeHTTPS, resolveDoH, SLOW_MS, setKey,
 } from './util.js';
 import { report } from './state.js';
 import { TOP50, REGIONS } from './data/top50.js';
@@ -40,7 +40,7 @@ export function initReach() {
     const rankTd = el('td', 'num', String(site.rank));
 
     const statusTd = el('td');
-    const dot = el('span', 'dot unknown');
+    const dot = el('span', 'sdot unknown');
     statusTd.appendChild(dot);
 
     const nameTd = el('td', null, site.name);
@@ -140,7 +140,7 @@ export async function runReachability(onProgress) {
 
   async function probeSite(r) {
     const { site } = r;
-    r.cells.dot.className = 'dot scanning';
+    r.cells.dot.className = 'sdot scanning';
 
     // Resolve the IP: literal IPv4 hosts pass through, everything else via DoH.
     if (IPV4.test(site.host)) {
@@ -151,7 +151,7 @@ export async function runReachability(onProgress) {
         r.ip = res.ip || null;
       } catch { r.ip = null; }
     }
-    r.cells.ip.textContent = r.ip || 'no DNS';
+    if (r.ip) { delete r.cells.ip.dataset.tkey; r.cells.ip.textContent = r.ip; } else setKey(r.cells.ip, 'no DNS');
 
     // Latency: an opaque HTTPS probe tells us up/down + round-trip only.
     try {
@@ -161,13 +161,13 @@ export async function runReachability(onProgress) {
       upCount++;
       r.cells.lat.textContent = fmtMs(ms);
       r.cells.lat.className = ms > SLOW_MS ? 'lat slow' : 'lat';
-      r.cells.dot.className = 'dot ' + dotForLatency(ms, true);
+      r.cells.dot.className = 'sdot ' + dotForLatency(ms, true);
     } catch {
       r.ms = null;
       r.ok = false;
-      r.cells.lat.textContent = 'down';
+      setKey(r.cells.lat, 'down');
       r.cells.lat.className = 'lat down';
-      r.cells.dot.className = 'dot unknown';
+      r.cells.dot.className = 'sdot unknown';
     }
 
     done++;

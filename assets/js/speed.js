@@ -2,7 +2,7 @@
 // Vanilla ES module, browser-only. Measures page ping (HEAD to self) and a
 // coarse download-speed estimate from static test files, then reads the
 // Network Information API for the browser's own view of the link.
-import { setText, setDot, dotForLatency, median, fmtMs, probeHTTPS } from './util.js';
+import { setText, setKey, setDot, dotForLatency, median, fmtMs, probeHTTPS } from './util.js';
 import { report } from './state.js';
 
 const TEST_FILE_SMALL = 'https://raw.githubusercontent.com/MiguelCarino/Carino-Systems/refs/heads/main/assets/files/sample_1mb';
@@ -33,7 +33,7 @@ export async function runPing() {
   }
 
   if (!samples.length) {
-    setText('pingPage', 'Timeout');
+    setKey('pingPage', 'Timeout');
     setText('pingMinMax', '—');
     setText('pingJitter', '—');
     report.ping = { page: null, min: null, max: null, jitter: null, samples: [] };
@@ -62,11 +62,38 @@ async function timedDownload(url) {
   return { bytes: blob.size, seconds: (performance.now() - start) / 1000 };
 }
 
+// The speed test can download up to 25 MB. With the browser's data saver on,
+// the automatic first run leaves it out and says so; Run all includes it.
+export function skipSpeed() {
+  setKey('dlSpeed', 'skipped');
+  setText('speedLatencyLoad', '—');
+  setDot('dot-speed', 'unknown');
+  const note = document.getElementById('saverNote');
+  if (note) note.hidden = false;
+  report.speed = { skipped: 'data saver', ...readNetInfo(), latencyUnderLoad: null };
+}
+
+// Network Information API — the browser's self-reported link class. Absent in
+// Firefox/Safari, so guard every field.
+function readNetInfo() {
+  const c = navigator.connection;
+  const connType = (c && (c.effectiveType || c.type) || 'N/A');
+  setText('connType', String(connType).toUpperCase());
+  if (c) setText('connDownlinkRtt', `${c.downlink ?? '?'} Mbps · ${c.rtt ?? '?'} ms`); else setKey('connDownlinkRtt', 'N/A');
+  return {
+    connType: String(connType).toUpperCase(),
+    downlink: c ? (c.downlink ?? null) : null,
+    rtt: c ? (c.rtt ?? null) : null,
+  };
+}
+
 // runSpeed — coarse download throughput + latency-under-load + Net Info API.
 // Browsers give us no raw-socket timing, so this is a single-stream estimate:
 // wall-clock over a static file. Small file first; if it finished too fast to
 // be meaningful (<0.5s) we re-run with the 25 MB file for a steadier number.
 export async function runSpeed() {
+  const note = document.getElementById('saverNote');
+  if (note) note.hidden = true;
   setText('dlSpeed', '…');
   let downMbps = null;
 
@@ -85,9 +112,9 @@ export async function runSpeed() {
     const dl = navigator.connection && navigator.connection.downlink;
     if (typeof dl === 'number') {
       downMbps = dl;
-      setText('dlSpeed', `~${dl} Mbps est`);
+      setKey('dlSpeed', '~{n} Mbps est', { n: dl });
     } else {
-      setText('dlSpeed', 'Error');
+      setKey('dlSpeed', 'Error');
     }
   }
 
@@ -104,19 +131,6 @@ export async function runSpeed() {
     setDot('dot-speed', 'unknown');
   }
 
-  // Network Information API — the browser's self-reported link class. Absent in
-  // Firefox/Safari, so guard every field.
-  const c = navigator.connection;
-  const connType = (c && (c.effectiveType || c.type) || 'N/A');
-  setText('connType', String(connType).toUpperCase());
-  setText('connDownlinkRtt', c ? `${c.downlink ?? '?'} Mbps · ${c.rtt ?? '?'} ms` : 'N/A');
-
-  report.speed = {
-    downMbps,
-    connType: String(connType).toUpperCase(),
-    downlink: c ? (c.downlink ?? null) : null,
-    rtt: c ? (c.rtt ?? null) : null,
-    latencyUnderLoad,
-  };
+  report.speed = { downMbps, ...readNetInfo(), latencyUnderLoad };
   return report.speed;
 }

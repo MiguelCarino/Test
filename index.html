@@ -21,134 +21,140 @@
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Carino Test", "url": "https://test.carino.systems/", "description": "Carino Test — a complete in-browser network and system diagnostics suite: WAN/LAN, NAT and WebRTC topology, DNS-over-HTTPS, latency, speed, and a live reachability sweep of the top 50 websites in the world.", "operatingSystem": "Any (runs in a web browser)", "isAccessibleForFree": true, "author": {"@type": "Person", "name": "Miguel Cariño", "url": "https://carino.systems/"}}</script>
   <!-- /carino:head -->
   <link rel="stylesheet" href="fonts/carino-fonts.css" />
+  <link rel="stylesheet" href="carino-ui.css" />
   <link rel="stylesheet" href="assets/css/test.css" />
 </head>
 <body>
 
-  <header class="hero">
-    <div class="controls">
-      <button class="btn primary" id="runAll">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        Run all tests
-      </button>
-      <button class="btn" id="exportPng">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
-        Export PNG
-      </button>
-      <button class="btn" id="exportJson">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
-        Export JSON
-      </button>
-      <div class="progress-wrap">
-        <div class="progress"><i id="overallProgress"></i></div>
-        <span class="progress-label" id="overallStatus">idle</span>
-      </div>
-    </div>
-    <div class="legend" aria-hidden="true">
-      <span><i class="dot success"></i> responsive</span>
-      <span><i class="dot slow"></i> slow (&gt;600ms)</span>
-      <span><i class="dot unknown"></i> no connection</span>
-      <span><i class="dot fail"></i> error</span>
-    </div>
-  </header>
+  <!-- Navbar controls; carino-navbar.js moves this block into the shared bar.
+       Source first, then when the numbers were taken, then the one main action. -->
+  <div class="t-actions" data-carino-actions>
+    <span class="live-chip" id="srcChip" data-priority="2" title="Every reading is taken by this browser">Not run yet</span>
+    <span class="fresh paused" id="runStamp"></span>
+    <span class="t-progress" id="progressWrap" hidden><i id="overallProgress"></i></span>
+    <button class="cs-btn primary" id="runAll" data-priority="1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span data-i18n>Run all tests</span>
+    </button>
+    <button class="cs-btn" id="exportPng" title="Save the results as an image">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+      PNG
+    </button>
+    <button class="cs-btn" id="exportJson" title="Save the results as JSON">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+      JSON
+    </button>
+  </div>
 
   <main class="grid">
 
+    <div class="legend" aria-hidden="true">
+      <span><i class="sdot success"></i> <span data-i18n>responsive</span></span>
+      <span><i class="sdot slow"></i> <span data-i18n>slow (&gt;600ms)</span></span>
+      <span><i class="sdot unknown"></i> <span data-i18n>no connection</span></span>
+      <span><i class="sdot fail"></i> <span data-i18n>error</span></span>
+    </div>
+
     <!-- CONNECTION -->
     <section class="panel" id="panelConnection">
-      <h2>Connection <span class="h2-extra" id="connExtra"></span></h2>
-      <div class="kv"><span class="k">WAN IPv4</span><span class="v group"><span id="wan4">…</span><i class="dot unknown" id="dot-wan4"></i></span></div>
-      <div class="kv"><span class="k">WAN IPv6</span><span class="v group"><span id="wan6">…</span><i class="dot unknown" id="dot-wan6"></i></span></div>
-      <div class="kv"><span class="k">ISP / Org</span><span class="v" id="isp">…</span></div>
+      <h2><span data-i18n>Connection</span> <span class="h2-extra" id="connExtra"></span></h2>
+      <div class="kv"><span class="k">WAN IPv4</span><span class="v group"><span id="wan4">…</span><i class="sdot unknown" id="dot-wan4"></i></span></div>
+      <div class="kv"><span class="k">WAN IPv6</span><span class="v group"><span id="wan6">…</span><i class="sdot unknown" id="dot-wan6"></i></span></div>
+      <div class="kv"><span class="k" data-i18n>ISP / Org</span><span class="v" id="isp">…</span></div>
       <div class="kv"><span class="k">ASN</span><span class="v" id="asn">…</span></div>
-      <div class="kv"><span class="k">Geo</span><span class="v" id="geo">…</span></div>
-      <div class="kv"><span class="k">LAN IP</span><span class="v group"><span id="lanip">…</span><i class="dot unknown" id="dot-lan"></i></span></div>
-      <div class="kv"><span class="k">NAT</span><span class="v group"><span id="natType">…</span><i class="dot unknown" id="dot-nat"></i></span></div>
-      <div class="kv"><span class="k">Interfaces</span><span class="v group"><span id="ifaces">…</span><i class="dot unknown" id="dot-ifaces"></i></span></div>
-      <div class="kv"><span class="k">WebRTC / WAN</span><span class="v group"><span id="rtcLeak">…</span><i class="dot unknown" id="dot-leak"></i></span></div>
+      <div class="kv"><span class="k" data-i18n>Geo</span><span class="v" id="geo">…</span></div>
+      <div class="kv"><span class="k" data-i18n>LAN IP</span><span class="v group"><span id="lanip">…</span><i class="sdot unknown" id="dot-lan"></i></span></div>
+      <div class="kv"><span class="k">NAT</span><span class="v group"><span id="natType">…</span><i class="sdot unknown" id="dot-nat"></i></span></div>
+      <div class="kv"><span class="k" data-i18n>Interfaces</span><span class="v group"><span id="ifaces">…</span><i class="sdot unknown" id="dot-ifaces"></i></span></div>
+      <div class="kv"><span class="k">WebRTC / WAN</span><span class="v group"><span id="rtcLeak">…</span><i class="sdot unknown" id="dot-leak"></i></span></div>
     </section>
 
     <!-- LATENCY + SPEED -->
     <section class="panel" id="panelSpeed">
-      <h2>Latency &amp; Throughput</h2>
+      <h2 data-i18n>Latency &amp; Throughput</h2>
+      <p class="alert warn" id="saverNote" hidden data-i18n>Data saver is on, so the speed test (up to 25 MB) did not run on its own. Press Run all tests to include it.</p>
       <div class="stats">
-        <div class="stat"><div class="n" id="dlSpeed">—</div><div class="l">Download</div></div>
-        <div class="stat"><div class="n" id="pingPage">—</div><div class="l">Ping (origin)</div></div>
-        <div class="stat"><div class="n" id="pingJitter">—</div><div class="l">Jitter</div></div>
+        <div class="stat"><div class="n" id="dlSpeed">—</div><div class="l" data-i18n>Download</div></div>
+        <div class="stat"><div class="n" id="pingPage">—</div><div class="l" data-i18n>Ping (origin)</div></div>
+        <div class="stat"><div class="n" id="pingJitter">—</div><div class="l" data-i18n>Jitter</div></div>
       </div>
-      <div class="kv"><span class="k">Ping min / max</span><span class="v" id="pingMinMax">…</span></div>
-      <div class="kv"><span class="k">Latency under load</span><span class="v group"><span id="speedLatencyLoad">…</span><i class="dot unknown" id="dot-speed"></i></span></div>
-      <div class="kv"><span class="k">Conn (Net Info API)</span><span class="v" id="connType">…</span></div>
-      <div class="kv"><span class="k">Downlink / RTT</span><span class="v" id="connDownlinkRtt">…</span></div>
+      <div class="kv"><span class="k" data-i18n>Ping min / max</span><span class="v" id="pingMinMax">…</span></div>
+      <div class="kv"><span class="k" data-i18n>Latency under load</span><span class="v group"><span id="speedLatencyLoad">…</span><i class="sdot unknown" id="dot-speed"></i></span></div>
+      <div class="kv"><span class="k" data-i18n>Conn (Net Info API)</span><span class="v" id="connType">…</span></div>
+      <div class="kv"><span class="k" data-i18n>Downlink / RTT</span><span class="v" id="connDownlinkRtt">…</span></div>
     </section>
 
     <!-- DNS -->
     <section class="panel wide" id="panelDns">
-      <h2>DNS over HTTPS <span class="h2-extra" id="dnsSummary"></span></h2>
+      <h2><span data-i18n>DNS over HTTPS</span> <span class="h2-extra" id="dnsSummary"></span></h2>
       <div class="table-scroll">
         <table class="reach">
-          <thead><tr><th>Host</th><th>Cloudflare (1.1.1.1)</th><th>Google (8.8.8.8)</th><th>AAAA</th><th>Match</th></tr></thead>
+          <thead><tr><th data-i18n>Host</th><th>Cloudflare (1.1.1.1)</th><th>Google (8.8.8.8)</th><th>AAAA</th><th data-i18n>Match</th></tr></thead>
           <tbody id="dnsList"></tbody>
         </table>
       </div>
-      <p class="note">Resolving the same names through two independent DoH resolvers; a mismatch flags a hijack, split-horizon DNS, or geo-DNS steering rather than a dead site.</p>
+      <p class="note" data-i18n>Resolving the same names through two independent DoH resolvers; a mismatch flags a hijack, split-horizon DNS, or geo-DNS steering rather than a dead site.</p>
     </section>
 
     <!-- REACHABILITY: TOP 50 -->
     <section class="panel wide" id="panelReach">
-      <h2>Top 50 Websites — Reachability <span class="h2-extra" id="reachCount">0 / 50</span></h2>
+      <h2><span data-i18n>Top 50 websites: reachability</span> <span class="h2-extra" id="reachCount">0 / 50</span></h2>
       <div class="stats">
-        <div class="stat"><div class="n" id="reachUp">—</div><div class="l">Reachable</div></div>
-        <div class="stat"><div class="n" id="reachMedian">—</div><div class="l">Median latency</div></div>
-        <div class="stat"><div class="n" id="reachMin">—</div><div class="l">Fastest</div></div>
-        <div class="stat"><div class="n" id="reachMax">—</div><div class="l">Slowest</div></div>
-        <div class="stat"><div class="n" id="reachRegions">—</div><div class="l">Regions up</div></div>
+        <div class="stat"><div class="n" id="reachUp">—</div><div class="l" data-i18n>Reachable</div></div>
+        <div class="stat"><div class="n" id="reachMedian">—</div><div class="l" data-i18n>Median latency</div></div>
+        <div class="stat"><div class="n" id="reachMin">—</div><div class="l" data-i18n>Fastest</div></div>
+        <div class="stat"><div class="n" id="reachMax">—</div><div class="l" data-i18n>Slowest</div></div>
+        <div class="stat"><div class="n" id="reachRegions">—</div><div class="l" data-i18n>Regions up</div></div>
       </div>
       <div class="reach-toolbar">
         <input type="search" id="reachSearch" placeholder="filter by name, host or region…" autocomplete="off" />
-        <select id="reachRegionFilter" aria-label="Filter by region"><option value="">all regions</option></select>
+        <select id="reachRegionFilter" aria-label="Filter by region"><option value="" data-i18n>all regions</option></select>
       </div>
       <div class="table-scroll">
         <table class="reach" id="reachTable">
           <thead><tr>
             <th data-sort="rank" class="sort-asc">#</th>
             <th data-sort="status">●</th>
-            <th data-sort="name">Site</th>
-            <th data-sort="host">Host</th>
-            <th data-sort="ip">Resolved IP</th>
-            <th data-sort="ms">Latency</th>
-            <th data-sort="region">Region</th>
+            <th data-sort="name" data-i18n>Site</th>
+            <th data-sort="host" data-i18n>Host</th>
+            <th data-sort="ip" data-i18n>Resolved IP</th>
+            <th data-sort="ms" data-i18n>Latency</th>
+            <th data-sort="region" data-i18n>Region</th>
           </tr></thead>
           <tbody id="reachTableBody"></tbody>
         </table>
       </div>
-      <p class="note">Latency is an HTTPS handshake+response time from your browser, not ICMP. Sites behind the Great Firewall or hosted far away will read slow (white) or unreachable (grey) from your location — that spread is the diagnostic signal.</p>
+      <p class="note" data-i18n>Latency is an HTTPS handshake+response time from your browser, not ICMP. Sites behind the Great Firewall or hosted far away will read slow (white) or unreachable (grey) from your location — that spread is the diagnostic signal.</p>
     </section>
 
     <!-- SYSTEM -->
     <section class="panel wide" id="panelSystem">
-      <h2>System &amp; Hardware</h2>
+      <h2 data-i18n>System &amp; Hardware</h2>
       <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 24px; max-width: none; margin: 0; padding: 0;">
         <div>
-          <div class="kv"><span class="k">OS</span><span class="v" id="sysOS">…</span></div>
-          <div class="kv"><span class="k">Browser</span><span class="v" id="sysBrowser">…</span></div>
-          <div class="kv"><span class="k">Architecture</span><span class="v" id="sysArch">…</span></div>
-          <div class="kv"><span class="k">CPU threads</span><span class="v" id="sysCpu">…</span></div>
-          <div class="kv"><span class="k">Memory</span><span class="v" id="sysRam">…</span></div>
+          <div class="kv"><span class="k" data-i18n>OS</span><span class="v" id="sysOS">…</span></div>
+          <div class="kv"><span class="k" data-i18n>Browser</span><span class="v" id="sysBrowser">…</span></div>
+          <div class="kv"><span class="k" data-i18n>Architecture</span><span class="v" id="sysArch">…</span></div>
+          <div class="kv"><span class="k" data-i18n>CPU threads</span><span class="v" id="sysCpu">…</span></div>
+          <div class="kv"><span class="k" data-i18n>Memory</span><span class="v" id="sysRam">…</span></div>
         </div>
         <div>
-          <div class="kv"><span class="k">GPU</span><span class="v" id="sysGpu">…</span></div>
-          <div class="kv"><span class="k">Display</span><span class="v" id="sysScreen">…</span></div>
-          <div class="kv"><span class="k">Battery</span><span class="v" id="sysBattery">…</span></div>
-          <div class="kv"><span class="k">Language</span><span class="v" id="sysLang">…</span></div>
-          <div class="kv"><span class="k">Time zone</span><span class="v" id="sysTz">…</span></div>
+          <div class="kv"><span class="k" data-i18n>GPU</span><span class="v" id="sysGpu">…</span></div>
+          <div class="kv"><span class="k" data-i18n>Display</span><span class="v" id="sysScreen">…</span></div>
+          <div class="kv"><span class="k" data-i18n>Battery</span><span class="v" id="sysBattery">…</span></div>
+          <div class="kv"><span class="k" data-i18n>Language</span><span class="v" id="sysLang">…</span></div>
+          <div class="kv"><span class="k" data-i18n>Time zone</span><span class="v" id="sysTz">…</span></div>
         </div>
       </div>
     </section>
 
   </main>
 
+  <p class="data-foot" data-i18n>Data: this browser. A run asks ipify and ipapi.co for your public address, Cloudflare and Google for DNS-over-HTTPS and STUN, and each of the top 50 sites for a response; the speed test downloads up to 25 MB from raw.githubusercontent.com. Runs in your browser; nothing is uploaded.</p>
+
   <script src="carino-navbar.js" data-app="Test" defer></script>
+  <script src="carino-lang.js" defer></script>
+  <script src="i18n.js" defer></script>
   <script type="module" src="assets/js/app.js"></script>
 </body>
 </html>
