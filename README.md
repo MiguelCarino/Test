@@ -28,7 +28,7 @@ reachability sweep of the **top 50 websites in the world**.
 - **System & hardware** — OS, browser, architecture, CPU threads, memory, GPU,
   display, battery, language and time zone.
 
-Export the whole run as a **PNG** report card or a **JSON** dump.
+Export the whole run as a **PNG** report card or a **JSON** dump, labelled in the page language (the JSON keys stay English).
 
 ## How the probing works (and its limits)
 

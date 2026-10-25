@@ -2,8 +2,25 @@
 // downloadable JSON file, or paint it onto a canvas as a dark diagnostics card
 // (no libraries — just 2D drawing) and download that PNG. Both read straight
 // from state so the export always matches whatever the last run produced.
+// The state keeps English words; both exports put the human-readable ones
+// (labels, verdicts, sources) in the page language through i18n.js. JSON keys
+// stay English so a saved file reads the same to a script in any language.
 
 import { report } from './state.js';
+
+// i18n.js (deferred, before this module) sets window.t; without it, English.
+const T = (k) => (typeof window.t === 'function' ? window.t(k) : k);
+const TF = (k, vars) => T(k).replace(/\{(\w+)\}/g, (m, n) => (n in vars ? vars[n] : m));
+
+// The measured values that are words rather than readings, as system.js and
+// net.js show them on the page.
+function word(v) {
+  if (typeof v !== 'string') return v;
+  let m;
+  if ((m = /^(\d+) threads$/.exec(v))) return TF('{n} threads', { n: m[1] });
+  if ((m = /^(\d+%) \((charging|on battery)\)$/.exec(v))) return TF('{p} (' + m[2] + ')', { p: m[1] });
+  return T(v);
+}
 
 // Trigger a browser download for a Blob via a throwaway <a>. Object URLs are
 // revoked on the next tick so we don't leak them for the tab's lifetime.
@@ -21,8 +38,22 @@ function downloadBlob(blob, filename) {
 const epoch = () => Math.floor(Date.now() / 1000);
 
 // ---- JSON ----------------------------------------------------------------
+// A copy of the report with its words in the page language; numbers,
+// addresses and names are left as they were measured.
+function localizedReport() {
+  const r = JSON.parse(JSON.stringify(report));
+  r.lang = document.documentElement.lang || 'en';
+  r.sources = (r.sources || []).map(T);
+  const c = r.connection || {};
+  ['nat', 'leak'].forEach((k) => { if (c[k]) c[k] = word(c[k]); });
+  const sys = r.system || {};
+  ['cpu', 'ram', 'browser', 'arch', 'battery', 'lang', 'tz'].forEach((k) => { if (sys[k]) sys[k] = word(sys[k]); });
+  if (r.speed && r.speed.skipped) r.speed.skipped = T(r.speed.skipped);
+  return r;
+}
+
 export function exportJSON() {
-  const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify(localizedReport(), null, 2)], { type: 'application/json' });
   downloadBlob(blob, `carino-test-${epoch()}.json`);
 }
 
@@ -64,35 +95,35 @@ export function exportPNG() {
   push('title', null, H_TITLE);
 
   // CONNECTION
-  push('header', 'CONNECTION', H_HEADER);
-  push('kv', ['WAN IPv4', val(conn.wan4)], H_LINE);
-  push('kv', ['WAN IPv6', val(conn.wan6)], H_LINE);
-  push('kv', ['ISP', val(conn.isp)], H_LINE);
-  push('kv', ['ASN', val(conn.asn)], H_LINE);
-  push('kv', ['Geo', val(conn.geo)], H_LINE);
-  push('kv', ['LAN IP', val(conn.lan)], H_LINE);
-  push('kv', ['NAT type', val(conn.nat)], H_LINE);
-  push('kv', ['Interfaces', val(conn.ifaces)], H_LINE);
-  push('kv', ['WebRTC leak', val(conn.leak)], H_LINE);
+  push('header', T('Connection'), H_HEADER);
+  push('kv', [T('WAN IPv4'), val(conn.wan4)], H_LINE);
+  push('kv', [T('WAN IPv6'), val(conn.wan6)], H_LINE);
+  push('kv', [T('ISP / Org'), val(conn.isp)], H_LINE);
+  push('kv', [T('ASN'), val(conn.asn)], H_LINE);
+  push('kv', [T('Geo'), val(conn.geo)], H_LINE);
+  push('kv', [T('LAN IP'), val(conn.lan)], H_LINE);
+  push('kv', [T('NAT type'), val(word(conn.nat))], H_LINE);
+  push('kv', [T('Interfaces'), val(conn.ifaces)], H_LINE);
+  push('kv', [T('WebRTC leak'), val(word(conn.leak))], H_LINE);
   push('gap', null, H_SECTION_GAP);
 
   // LATENCY & THROUGHPUT
-  push('header', 'LATENCY & THROUGHPUT', H_HEADER);
-  push('kv', ['Download', num(speed.downMbps) != null ? speed.downMbps + ' Mbps' : '—'], H_LINE);
-  push('kv', ['Ping (page)', fmtMs(ping.page)], H_LINE);
-  push('kv', ['Jitter', fmtMs(ping.jitter)], H_LINE);
-  push('kv', ['Min / Max', `${fmtMs(ping.min)} / ${fmtMs(ping.max)}`], H_LINE);
-  push('kv', ['Latency under load', fmtMs(speed.latencyUnderLoad)], H_LINE);
+  push('header', T('Latency & Throughput'), H_HEADER);
+  push('kv', [T('Download'), num(speed.downMbps) != null ? speed.downMbps + ' Mbps' : '—'], H_LINE);
+  push('kv', [T('Ping (origin)'), fmtMs(ping.page)], H_LINE);
+  push('kv', [T('Jitter'), fmtMs(ping.jitter)], H_LINE);
+  push('kv', [T('Ping min / max'), `${fmtMs(ping.min)} / ${fmtMs(ping.max)}`], H_LINE);
+  push('kv', [T('Latency under load'), fmtMs(speed.latencyUnderLoad)], H_LINE);
   push('gap', null, H_SECTION_GAP);
 
   // DNS
-  push('header', 'DNS', H_HEADER);
-  push('kv', ['Summary', val(dnsSummaryText(dns.summary))], H_LINE);
+  push('header', T('DNS'), H_HEADER);
+  push('kv', [T('Summary'), val(dnsSummaryText(dns.summary))], H_LINE);
   push('gap', null, H_SECTION_GAP);
 
   // REACHABILITY — every Top-50 site, full size.
-  push('header', 'REACHABILITY — TOP 50', H_HEADER);
-  push('kv', ['Summary', val(reachSummaryText(reach.summary))], H_LINE);
+  push('header', T('Top 50 websites: reachability'), H_HEADER);
+  push('kv', [T('Summary'), val(reachSummaryText(reach.summary))], H_LINE);
   for (const s of sites) push('dot', s, H_DOTROW);
 
   // ---- Compute height.
@@ -128,7 +159,7 @@ export function exportPNG() {
       ctx.fillStyle = GOLD;
       ctx.font = "900 18px 'Red Hat Display', system-ui, sans-serif";
       ctx.textAlign = 'left';
-      ctx.fillText('CARINO TEST — DIAGNOSTICS', pad, y + 20);
+      ctx.fillText(T('Carino Test — diagnostics').toUpperCase(), pad, y + 20);
       // When the run finished (not when it was exported), grey mono, right-aligned.
       ctx.fillStyle = GREY;
       ctx.font = '10px ui-monospace, SFMono-Regular, Menlo, monospace';
@@ -172,7 +203,7 @@ export function exportPNG() {
       ctx.fillText(clip(ctx, val(s.name), 200), pad + 16, y + 14);
       ctx.fillStyle = GREY;
       ctx.textAlign = 'right';
-      const right = `${val(s.ip)}   ${s.ok ? fmtMs(s.ms) : 'down'}`;
+      const right = `${val(s.ip)}   ${s.ok ? fmtMs(s.ms) : T('down')}`;
       ctx.fillText(right, W - pad, y + 14);
       ctx.textAlign = 'left';
     }
@@ -184,7 +215,7 @@ export function exportPNG() {
   ctx.fillStyle = GOLD;
   ctx.font = '11px ui-monospace, SFMono-Regular, Menlo, monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('test.carino.systems · measured by this browser', W / 2, H - 18);
+  ctx.fillText('test.carino.systems · ' + T('measured by this browser'), W / 2, H - 18);
   ctx.textAlign = 'left';
 
   // toBlob is async; download once the raster is ready.
@@ -209,8 +240,11 @@ function dnsSummaryText(summary) {
   if (summary.label) return summary.label;
   const parts = [];
   // Fields actually written by runDNS(): { resolved, mismatch }.
-  if (summary.resolved != null) parts.push(`${summary.resolved} resolved`);
-  if (summary.mismatch != null) parts.push(`${summary.mismatch} mismatch`);
+  if (summary.resolved != null && summary.mismatch != null) {
+    return TF('{n} resolved · {x} mismatch', { n: summary.resolved, x: summary.mismatch });
+  }
+  if (summary.resolved != null) parts.push(TF('{n} resolved', { n: summary.resolved }));
+  if (summary.mismatch != null) parts.push(TF('{x} mismatch', { x: summary.mismatch }));
   return parts.length ? parts.join(' · ') : '—';
 }
 
@@ -218,10 +252,10 @@ function reachSummaryText(summary) {
   if (!summary || typeof summary !== 'object') return summary == null ? '—' : String(summary);
   if (summary.text) return summary.text;
   const parts = [];
-  if (summary.up != null) parts.push(`${summary.up} up`);
-  if (num(summary.median) != null) parts.push(`median ${Math.round(summary.median)} ms`);
+  if (summary.up != null) parts.push(TF('{n} up', { n: summary.up }));
+  if (num(summary.median) != null) parts.push(TF('median {n} ms', { n: Math.round(summary.median) }));
   // runReachability() writes regionsUp, not regions.
   const regions = summary.regionsUp != null ? summary.regionsUp : summary.regions;
-  if (regions != null) parts.push(`${regions} regions`);
+  if (regions != null) parts.push(TF('{n} regions', { n: regions }));
   return parts.length ? parts.join(' · ') : '—';
 }

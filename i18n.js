@@ -6,7 +6,8 @@
 // fleet 'carino:langchange' event.
 // Measured values (addresses, names, numbers) stay as they are; the words the
 // app writes around them carry their key in data-tkey and are repainted here.
-// The PNG and JSON exports stay in English.
+// The PNG and JSON exports use the page language too (export.js); the JSON
+// keys stay English.
 // Japanese deliberately says "PC"-style loanwords, never コンピューター.
 
 const I18N = {
@@ -124,6 +125,25 @@ const I18N = {
         '{p} (on battery)': '{p} (con batería)',
         // footer
         'Data: this browser. A run asks ipify and ipapi.co for your public address, Cloudflare and Google for DNS-over-HTTPS and STUN, and each of the top 50 sites for a response; the speed test downloads up to 25 MB from raw.githubusercontent.com. Runs in your browser; nothing is uploaded.': 'Datos: este navegador. Cada ejecución pide tu dirección pública a ipify e ipapi.co, DNS sobre HTTPS y STUN a Cloudflare y Google, y una respuesta a cada uno de los 50 sitios; la prueba de velocidad descarga hasta 25 MB de raw.githubusercontent.com. Se ejecuta en tu navegador; no se sube nada.',
+        // exports (PNG and JSON)
+        'Carino Test — diagnostics': 'Carino Test — diagnóstico',
+        'NAT type': 'Tipo de NAT',
+        'WebRTC leak': 'Fuga de WebRTC',
+        'Summary': 'Resumen',
+        'leak': 'fuga',
+        'data saver': 'ahorro de datos',
+        '{n} resolved · {x} mismatch': '{n} resueltos · {x} discrepan',
+        '{n} resolved': '{n} resueltos',
+        '{x} mismatch': '{x} discrepan',
+        '{n} up': '{n} responden',
+        'median {n} ms': 'mediana {n} ms',
+        '{n} regions': '{n} regiones',
+        'measured by this browser': 'medido por este navegador',
+        'this browser': 'este navegador',
+        'ipify.org, ipapi.co (public address, ISP)': 'ipify.org, ipapi.co (dirección pública, ISP)',
+        'Cloudflare and Google (DNS-over-HTTPS, STUN)': 'Cloudflare y Google (DNS sobre HTTPS, STUN)',
+        'raw.githubusercontent.com (speed test, up to 25 MB)': 'raw.githubusercontent.com (prueba de velocidad, hasta 25 MB)',
+        'the top 50 sites (HTTPS reachability)': 'los 50 sitios principales (alcance HTTPS)',
     },
     'pt-BR': {
         'Late shift.': 'Turno da madrugada.',
@@ -231,6 +251,25 @@ const I18N = {
         '{p} (charging)': '{p} (carregando)',
         '{p} (on battery)': '{p} (na bateria)',
         'Data: this browser. A run asks ipify and ipapi.co for your public address, Cloudflare and Google for DNS-over-HTTPS and STUN, and each of the top 50 sites for a response; the speed test downloads up to 25 MB from raw.githubusercontent.com. Runs in your browser; nothing is uploaded.': 'Dados: este navegador. Cada execução pede seu endereço público ao ipify e ao ipapi.co, DNS sobre HTTPS e STUN à Cloudflare e ao Google, e uma resposta a cada um dos 50 sites; o teste de velocidade baixa até 25 MB de raw.githubusercontent.com. Roda no seu navegador; nada é enviado.',
+        // exports (PNG and JSON)
+        'Carino Test — diagnostics': 'Carino Test — diagnóstico',
+        'NAT type': 'Tipo de NAT',
+        'WebRTC leak': 'Vazamento WebRTC',
+        'Summary': 'Resumo',
+        'leak': 'vazamento',
+        'data saver': 'economia de dados',
+        '{n} resolved · {x} mismatch': '{n} resolvidos · {x} divergem',
+        '{n} resolved': '{n} resolvidos',
+        '{x} mismatch': '{x} divergem',
+        '{n} up': '{n} respondem',
+        'median {n} ms': 'mediana {n} ms',
+        '{n} regions': '{n} regiões',
+        'measured by this browser': 'medido por este navegador',
+        'this browser': 'este navegador',
+        'ipify.org, ipapi.co (public address, ISP)': 'ipify.org, ipapi.co (endereço público, ISP)',
+        'Cloudflare and Google (DNS-over-HTTPS, STUN)': 'Cloudflare e Google (DNS sobre HTTPS, STUN)',
+        'raw.githubusercontent.com (speed test, up to 25 MB)': 'raw.githubusercontent.com (teste de velocidade, até 25 MB)',
+        'the top 50 sites (HTTPS reachability)': 'os 50 sites principais (alcance HTTPS)',
     },
     ja: {
         'Late shift.': '夜勤おつかれさまです。',
@@ -338,6 +377,25 @@ const I18N = {
         '{p} (charging)': '{p}（充電中）',
         '{p} (on battery)': '{p}（バッテリー駆動）',
         'Data: this browser. A run asks ipify and ipapi.co for your public address, Cloudflare and Google for DNS-over-HTTPS and STUN, and each of the top 50 sites for a response; the speed test downloads up to 25 MB from raw.githubusercontent.com. Runs in your browser; nothing is uploaded.': 'データ：このブラウザ。実行ごとに ipify と ipapi.co にパブリックアドレスを、Cloudflare と Google に DNS over HTTPS と STUN を、上位 50 サイトそれぞれに応答を問い合わせます。速度テストは raw.githubusercontent.com から最大 25 MB をダウンロードします。ブラウザ内で動作し、何もアップロードされません。',
+        // exports (PNG and JSON)
+        'Carino Test — diagnostics': 'Carino Test — 診断',
+        'NAT type': 'NATタイプ',
+        'WebRTC leak': 'WebRTCリーク',
+        'Summary': '概要',
+        'leak': 'リーク',
+        'data saver': 'データセーバー',
+        '{n} resolved · {x} mismatch': '{n} 解決 · 不一致 {x}',
+        '{n} resolved': '{n} 解決',
+        '{x} mismatch': '不一致 {x}',
+        '{n} up': '{n} 応答',
+        'median {n} ms': '中央値 {n} ms',
+        '{n} regions': '{n} 地域',
+        'measured by this browser': 'このブラウザで計測',
+        'this browser': 'このブラウザ',
+        'ipify.org, ipapi.co (public address, ISP)': 'ipify.org、ipapi.co(公開アドレス、ISP)',
+        'Cloudflare and Google (DNS-over-HTTPS, STUN)': 'CloudflareとGoogle(DNS over HTTPS、STUN)',
+        'raw.githubusercontent.com (speed test, up to 25 MB)': 'raw.githubusercontent.com(速度テスト、最大25 MB)',
+        'the top 50 sites (HTTPS reachability)': '上位50サイト(HTTPS到達性)',
     },
     ru: {
         'Late shift.': 'Ночная смена.',
@@ -445,6 +503,25 @@ const I18N = {
         '{p} (charging)': '{p} (заряжается)',
         '{p} (on battery)': '{p} (от батареи)',
         'Data: this browser. A run asks ipify and ipapi.co for your public address, Cloudflare and Google for DNS-over-HTTPS and STUN, and each of the top 50 sites for a response; the speed test downloads up to 25 MB from raw.githubusercontent.com. Runs in your browser; nothing is uploaded.': 'Данные: этот браузер. Каждый запуск запрашивает ваш публичный адрес у ipify и ipapi.co, DNS через HTTPS и STUN у Cloudflare и Google и ответ у каждого из 50 сайтов; тест скорости загружает до 25 МБ с raw.githubusercontent.com. Работает в браузере; ничего не загружается.',
+        // exports (PNG and JSON)
+        'Carino Test — diagnostics': 'Carino Test — диагностика',
+        'NAT type': 'Тип NAT',
+        'WebRTC leak': 'Утечка WebRTC',
+        'Summary': 'Итог',
+        'leak': 'утечка',
+        'data saver': 'экономия трафика',
+        '{n} resolved · {x} mismatch': '{n} разрешено · расхождений: {x}',
+        '{n} resolved': '{n} разрешено',
+        '{x} mismatch': 'расхождений: {x}',
+        '{n} up': 'отвечают: {n}',
+        'median {n} ms': 'медиана {n} ms',
+        '{n} regions': 'регионов: {n}',
+        'measured by this browser': 'измерено этим браузером',
+        'this browser': 'этот браузер',
+        'ipify.org, ipapi.co (public address, ISP)': 'ipify.org, ipapi.co (публичный адрес, провайдер)',
+        'Cloudflare and Google (DNS-over-HTTPS, STUN)': 'Cloudflare и Google (DNS через HTTPS, STUN)',
+        'raw.githubusercontent.com (speed test, up to 25 MB)': 'raw.githubusercontent.com (тест скорости, до 25 МБ)',
+        'the top 50 sites (HTTPS reachability)': '50 крупнейших сайтов (доступность по HTTPS)',
     },
 };
 
