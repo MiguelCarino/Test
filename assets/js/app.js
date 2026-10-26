@@ -37,7 +37,7 @@ function renderStamp() {
   if (!stamp || running || !report.finishedAt) return;
   const at = new Date(report.finishedAt);
   const age = Date.now() - at.getTime();
-  const time = at.toLocaleTimeString();
+  const time = at.toLocaleTimeString(document.documentElement.lang || undefined);
   const stale = age > STALE_MS;
   const cls = 'fresh' + (stale ? ' stale' : '');
   if (stamp.className !== cls) stamp.className = cls;

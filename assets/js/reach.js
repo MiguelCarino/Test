@@ -24,7 +24,8 @@ export function initReach() {
   const sel = $('reachRegionFilter');
   if (sel) {
     for (const r of REGIONS) {
-      const o = el('option', null, r);
+      const o = el('option');
+      setKey(o, r);
       o.value = r;
       sel.appendChild(o);
     }
@@ -47,7 +48,8 @@ export function initReach() {
     const hostTd = el('td', null, site.host);          // textContent only — never innerHTML with host
     const ipTd = el('td', 'ip', '—');
     const latTd = el('td', 'lat', '—');
-    const regionTd = el('td', 'region', site.region);
+    const regionTd = el('td', 'region');
+    setKey(regionTd, site.region);
 
     tr.appendChild(rankTd);
     tr.appendChild(statusTd);
