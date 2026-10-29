@@ -91,14 +91,12 @@ table.reach tr:hover td { background: rgba(255,255,255,0.02); }
 
 .note { color: var(--text-muted); font-family: var(--mono); font-size: 0.66rem; line-height: 1.5; margin-top: 10px; }
 
-/* ---- source line + data saver --------------------------------------- */
-.data-foot { width: min(1072px, calc(100% - 48px)); margin: 16px auto 40px; }
+/* ---- data saver --------------------------------------------------- */
 .panel .alert { margin: 0 0 10px; font-size: 0.7rem; }
 .panel .alert[hidden] { display: none; }
 
 /* ---- responsive -------------------------------------------------------- */
 @media (max-width: 760px) {
   .grid { grid-template-columns: 1fr; gap: 12px; padding: 0 14px; }
-  .data-foot { width: calc(100% - 28px); }
   table.reach td { max-width: 130px; }
 }
